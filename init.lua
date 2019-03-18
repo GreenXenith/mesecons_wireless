@@ -98,6 +98,7 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 	},
 	paramtype2 = "color",
 	palette = "mesecons_wireless_signal_palette.png",
+	sounds = default.node_sound_metal_defaults(),
 	digiline = {
 		effector = {
 			action = function(pos, node, dchannel, msg)
@@ -112,8 +113,10 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 				if node.param2 ~= 128 then
 					minetest.swap_node(pos, {name = node.name, param2 = 128})
 				end
+				-- Increase action count
 				meta:set_int("actions", actions + 1)
 				do_for_each(owner, channel, pos, function(each)
+					-- Relay signal
 					digiline:receptor_send(each, digiline.rules.default, dchannel, msg)
 					local enode = minetest.get_node(each)
 					minetest.swap_node(each, {name = enode.name, param2 = 128})
@@ -122,6 +125,7 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 		}
 	},
 	on_timer = function(pos)
+		-- Cooldown
 		minetest.get_meta(pos):set_int("actions", 0)
 		local node = minetest.get_node(pos)
 		if node.param2 ~= minetest.registered_nodes[node.name].place_param2 then
@@ -129,7 +133,6 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 		end
 		minetest.get_node_timer(pos):set(1, 0)
 	end,
-	sounds = default.node_sound_metal_defaults(),
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_int("range", 15)
@@ -156,10 +159,12 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 		local owner = meta:get_string("owner")
 		local channel = meta:get_string("channel")
 
+		-- Only owner can set
 		if setter == owner then
 			if fields.channel then
 				meta:set_string("channel", fields.channel)
 			end
+			-- Make sure range is valid
 			local newrange
 			if fields.range then
 				newrange = tonumber(fields.range)
@@ -169,6 +174,7 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 				if minetest.get_node(pos).name ~= "mesecons_wireless:transmitter_on" then
 					return
 				end
+				-- Turn off receivers outside smaller range
 				if current and current ~= 0 then
 					if current > newrange then
 						do_for_each(owner, channel, pos, function(each, dist)
@@ -180,6 +186,7 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 					end
 				end
 				meta:set_int("range", newrange)
+				-- Turn on new receivers
 				do_for_each(owner, channel, pos, function(each)
 					local name = minetest.get_node(each).name
 					if name == "mesecons_wireless:receiver_on" then
@@ -212,6 +219,7 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 					local meta = minetest.get_meta(pos)
 					local owner = meta:get_string("owner")
 					local channel = meta:get_string("channel")
+					-- Higher action value
 					meta:set_int("actions", actions + 5)
 					do_for_each(owner, channel, pos, function(each)
 						minetest.swap_node(each, {name = "mesecons_wireless:receiver_on", param2 = 64})
@@ -258,11 +266,12 @@ mesecon.register_node("mesecons_wireless:receiver", {
 	},
 	paramtype2 = "color",
 	palette = "mesecons_wireless_signal_palette.png",
+	sounds = default.node_sound_metal_defaults(),
 	digiline = {
 		receptor = {},
 	},
-	sounds = default.node_sound_metal_defaults(),
 	on_timer = function(pos)
+		-- Handle signal indicator
 		local node = minetest.get_node(pos)
 		if node.param2 ~= minetest.registered_nodes[node.name].place_param2 then
 			minetest.swap_node(pos, {name = node.name, param2 = minetest.registered_nodes[node.name].place_param2})
@@ -299,6 +308,7 @@ mesecon.register_node("mesecons_wireless:receiver", {
 			if not fields.channel then
 				return
 			end
+			-- Add to network if network < 100
 			local t = minetest.deserialize(storage:get_string(owner..":"..fields.channel))
 			if t then
 				local connections = 0
@@ -366,6 +376,7 @@ mesecon.register_node("mesecons_wireless:receiver", {
 	}
 )
 
+-- Start timers
 minetest.register_lbm({
 	label = "Refresh Wireless Transmitters",
 	name = "mesecons_wireless:clear_actions",
@@ -381,6 +392,7 @@ minetest.register_lbm({
 	end,
 })
 
+-- Crafting
 minetest.register_craftitem("mesecons_wireless:antenna", {
 	description = "Antenna",
 	inventory_image = "mesecons_wireless_antenna.png",
