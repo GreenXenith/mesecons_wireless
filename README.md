@@ -39,5 +39,5 @@ Sending a Digiline signal will result in a blue indicator (for a short time).
 Transmitters and receivers are not digiline devices, they only carry the signal. They are similar to wires, except, wireless. Yes, Digiline and Mesecon signals can be sent in unison. Digiline signals will transmit regardless of the transmitter being active.
 
 #### Overheating ####
-Transmitters are limited to 20 signals per second. A Mesecon signal counts as 5, as they are much harder to send rapidly. When a transmitter overheats, the signal will appear red until it cools down a second later. No signals will transmit during this time.
+Transmitters are limited to 20 signals per second. A Mesecon signal counts as 5, as they are much harder to send rapidly. When a transmitter overheats, the signal will appear red until it cools down a second later. No signals will transmit during this time.  
 ![Imgur](https://i.imgur.com/dccE0AR.png)
