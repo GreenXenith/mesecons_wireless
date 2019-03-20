@@ -172,6 +172,7 @@ mesecon.register_node("mesecons_wireless:transmitter", {
 			if newrange and newrange >= 1 and newrange <= range_max then
 				local current = meta:get_int("range")
 				if minetest.get_node(pos).name ~= "mesecons_wireless:transmitter_on" then
+					meta:set_int("range", newrange)
 					return
 				end
 				-- Turn off receivers outside smaller range
